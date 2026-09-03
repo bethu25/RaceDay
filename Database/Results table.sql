@@ -9,3 +9,4 @@ CREATE TABLE Results
 
     FOREIGN KEY (EnrolmentID) REFERENCES Enrolments(EnrolmentID)
 );
+
