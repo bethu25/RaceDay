@@ -46,11 +46,3 @@ The RaceDay system uses a SQL Server database to store information about:
 - Routes
 
 The database design and SQL script are available in the `docs` folder.
-
-## API
-
-The planned RaceDay API provides endpoints for authentication, user profiles, events, categories, enrolments and results.
-
-The API endpoint plan is available in:
-
-`docs/API-Endpoint-Plan.md`
