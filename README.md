@@ -66,3 +66,7 @@ The RaceDay project uses GitHub Actions for Continuous Integration and Continuou
 The CI/CD pipeline is used to automatically build and test the project when changes are pushed to the GitHub repository.
 
 ### Successful Build(TEST)
+
+The following screenshot shows a successful green CI/CD build:
+
+ 
