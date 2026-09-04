@@ -46,3 +46,6 @@ The RaceDay system uses a SQL Server database to store information about:
 - Routes
 
 The database design and SQL script are available in the `docs` folder.
+
+## MY Database 
+![image alt](https://github.com/bethu25/RaceDay/blob/6afd69a6777242ec6c6061f471b779e2f8a927ad/Screenshot%202026-09-04%20125751.png)
