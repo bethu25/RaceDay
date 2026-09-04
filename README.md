@@ -33,3 +33,16 @@ The Participant is a user who takes part in RaceDay events. Participants can:
 - Enrol in event categories
 - View their enrolments
 - View their race results
+
+## Database
+
+The RaceDay system uses a SQL Server database to store information about:
+
+- Users
+- Events
+- Categories
+- Enrolments
+- Results
+- Routes
+
+The database design and SQL script are available in the `docs` folder.
