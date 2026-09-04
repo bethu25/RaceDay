@@ -69,4 +69,6 @@ The CI/CD pipeline is used to automatically build and test the project when chan
 
 The following screenshot shows a successful green CI/CD build:
 
+![image alt](https://github.com/bethu25/RaceDay/blob/abf48e9c69a688d57bbc38baaf9d69e57d2e925c/Screenshot%202026-09-04%20200011.png)
+
  
