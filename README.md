@@ -21,3 +21,15 @@ The Organiser is responsible for managing RaceDay events. Organisers can:
 - View participant enrolments
 - Record participant results
 - Manage route information
+
+### Participant
+
+The Participant is a user who takes part in RaceDay events. Participants can:
+
+- Create an account
+- Log into the system
+- Manage their profile
+- Browse available events
+- Enrol in event categories
+- View their enrolments
+- View their race results
