@@ -58,3 +58,9 @@ The API endpoint plan is available in:
 
 `docs/API-Endpoint-Plan.md`
 
+## CI/CD
+
+The RaceDay project uses GitHub Actions for Continuous Integration and Continuous Deployment (CI/CD).
+
+The CI/CD pipeline is used to automatically build and test the project when changes are pushed to the GitHub repository.
+
