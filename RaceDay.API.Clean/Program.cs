@@ -31,6 +31,25 @@ namespace RaceDay.API.Clean
             // Registers the authentication service for dependency injection.
             builder.Services.AddScoped<AuthService>();
 
+            // Registers the services required to store user session data.
+            builder.Services.AddDistributedMemoryCache();
+
+            // Enables session management for logged-in users.
+            builder.Services.AddSession(options =>
+            {
+                // Ends the session after 30 minutes of inactivity.
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+
+                // Prevents client-side scripts from accessing the session cookie.
+                options.Cookie.HttpOnly = true;
+
+                // Allows the session cookie to work over local HTTP during development.
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+                // Restricts the cookie to the same site.
+                options.Cookie.SameSite = SameSiteMode.Lax;
+            });
+
             // Registers the services required by Swagger.
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -49,13 +68,13 @@ namespace RaceDay.API.Clean
                 app.UseSwaggerUI();
             }
 
-            // HTTPS redirection remains disabled while we test HTTP locally.
-            // app.UseHttpsRedirection();
+            // Enables session management before controllers handle requests.
+            app.UseSession();
 
             // Enables authorization middleware.
             app.UseAuthorization();
 
-            // Maps controller endpoints, including DatabaseTestController.
+            // Maps controller endpoints, including all API controllers.
             app.MapControllers();
 
             // Starts the application.

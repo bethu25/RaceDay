@@ -47,6 +47,45 @@ namespace RaceDay.API.Clean.Controllers
                 user.PhoneNumber
             });
         }
+
+        // Logs an existing user into RaceDay.
+        // POST: /api/Auth/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequest request)
+        {
+            // Check the submitted email and password using the authentication service.
+            var user = await _authService.LoginAsync(request);
+
+            // Reject the login if the email or password is incorrect.
+            if (user == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Invalid email address or password."
+                });
+            }
+
+            // Store the authenticated user's ID in their session.
+            HttpContext.Session.SetInt32("UserID", user.UserID);
+
+            // Store the user's role to support role-based access checks.
+            HttpContext.Session.SetString("UserRole", user.Role);
+
+            // Store the user's name for use by the application.
+            HttpContext.Session.SetString("FullName", user.FullName);
+
+            // Return account details without exposing the password hash.
+            return Ok(new
+            {
+                message = "Login successful.",
+                user.UserID,
+                user.FullName,
+                user.Email,
+                user.Role
+            });
+        }
+
     }
+
 
 }
