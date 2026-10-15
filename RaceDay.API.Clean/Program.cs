@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using RaceDay.API.Clean.Data;
 
 namespace RaceDay.API.Clean
 {
@@ -9,6 +11,9 @@ namespace RaceDay.API.Clean
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<RaceDayDbContext>(options => options.UseSqlServer(
+             builder.Configuration.GetConnectionString("RaceDayConnection")));
 
             // Add services to the container.
 

@@ -1,12 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RaceDay.API.Clean.Models;
 
 namespace RaceDay.API.Clean.Data
 {
-    public class RaceDayDbContext : DbContext // This is the Entity Framework Core class that manages database access
+    // Manages communication between the RaceDay API and SQL Server.
+    public class RaceDayDbContext : DbContext
     {
-        public RaceDayDbContext(DbContextOptions<RaceDayDbContext> options) : base(options) //This allows us to configure the database connection.
+        // Receives the database configuration from ASP.NET Core.
+        public RaceDayDbContext(DbContextOptions<RaceDayDbContext> options) : base(options)
         {
 
         }
+
+        // Represents the Users table in the RaceDay database.
+        public DbSet<User> Users { get; set; }
     }
 }
