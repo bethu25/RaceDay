@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Clean.Data;
+using Microsoft.AspNetCore.Identity;// Provides ASP.NET Core password hashing functionality.
+using RaceDay.API.Clean.Models;// Provides access to the RaceDay User model.
+using RaceDay.API.Clean.Services;// Provides access to the authentication service.
 
 namespace RaceDay.API.Clean
 {
@@ -21,6 +24,12 @@ namespace RaceDay.API.Clean
 
             // Registers API controllers before the application is built.
             builder.Services.AddControllers();
+            
+            // Registers the password hasher used to secure user passwords.
+            builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+            // Registers the authentication service for dependency injection.
+            builder.Services.AddScoped<AuthService>();
 
             // Registers the services required by Swagger.
             builder.Services.AddEndpointsApiExplorer();
