@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+// Provides access to the event request DTO.
+using RaceDay.API.Clean.DTOs;
+// Provides the session feature needed to simulate a logged-in Organiser.
+using Microsoft.AspNetCore.Http.Features;
 
 namespace RaceDay.API.Clean.Models
 {
