@@ -153,7 +153,6 @@ The following screenshot shows a successful CI/CD build from the RaceDay reposit
 
 ![Successful RaceDay CI/CD Build](https://github.com/bethu25/RaceDay/blob/6f2b59d2f1ea439856d474d3b8f62078180faf4e/Screenshot%202026-10-16%20204607.png)
 
-**Note:** Update this screenshot if necessary so that it shows the latest successful GitHub Actions run, including the build and unit-test steps.
 
 ## 8. Project Structure
 
