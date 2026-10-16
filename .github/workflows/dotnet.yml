@@ -1,8 +1,5 @@
-```yaml
-# Name displayed in the GitHub Actions tab.
 name: RaceDay CI/CD
 
-# Run the workflow when code is pushed or a pull request targets main.
 on:
   push:
     branches:
@@ -14,7 +11,6 @@ on:
 
 jobs:
   build:
-    # Use an Ubuntu virtual machine hosted by GitHub.
     runs-on: ubuntu-latest
 
     steps:
@@ -28,15 +24,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Restore the NuGet packages required by the solution.
+      # Restore the solution's dependencies.
       - name: Restore dependencies
         run: dotnet restore
 
-      # Compile the solution in Release configuration.
+      # Build the solution.
       - name: Build project
         run: dotnet build --no-restore --configuration Release
 
-      # Run the unit tests in the solution.
+      # Run the automated unit tests.
       - name: Run unit tests
         run: dotnet test --no-build --configuration Release --verbosity normal
-```
+
