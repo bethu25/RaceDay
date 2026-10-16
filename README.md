@@ -151,7 +151,7 @@ This process helps identify build errors and failing tests before changes are ac
 
 The following screenshot shows a successful CI/CD build from the RaceDay repository.
 
-![Successful RaceDay CI/CD Build](https://github.com/bethu25/RaceDay/blob/abf48e9c69a688d57bbc38baaf9d69e57d2e925c/Screenshot%202026-09-04%20200011.png)
+![Successful RaceDay CI/CD Build](https://github.com/bethu25/RaceDay/blob/6f2b59d2f1ea439856d474d3b8f62078180faf4e/Screenshot%202026-10-16%20204607.png)
 
 **Note:** Update this screenshot if necessary so that it shows the latest successful GitHub Actions run, including the build and unit-test steps.
 
