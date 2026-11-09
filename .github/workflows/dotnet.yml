@@ -35,3 +35,4 @@ jobs:
       # Run the automated unit tests.
       - name: Run unit tests
         run: dotnet test --no-build --configuration Release --verbosity normal
+```
