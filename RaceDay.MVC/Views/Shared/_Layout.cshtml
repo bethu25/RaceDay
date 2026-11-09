@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - RaceDay</title>
+
+    <!-- Load Bootstrap styling. -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Load the website's custom styling. -->
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <style>
+            /* Main RaceDay navigation styling. */
+            .navbar-brand {
+                font-weight: bold;
+                font-size: 24px;
+            }
+
+            .navbar {
+                background-color: #172554;
+            }
+
+            .navbar .nav-link,
+            .navbar .navbar-brand {
+                color: white;
+            }
+
+            .navbar .nav-link:hover {
+                color: #93c5fd;
+            }
+
+            /* Keep the footer at the bottom of the page. */
+            body {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            main {
+                flex: 1;
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- Website navigation menu. -->
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+
+                <!-- Website logo/name. -->
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    RaceDay
+                </a>
+
+                <!-- Navigation button for smaller screens. -->
+                <button class="navbar-toggler bg-light"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavigation">
+
+                    <ul class="navbar-nav me-auto">
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Home"
+                               asp-action="Index">
+                                Home
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               asp-controller="Events"
+                               asp-action="Index">
+                                Events
+                            </a>
+                        </li>
+
+                    </ul>
+
+                    <!-- Display different navigation links based on login status. -->
+                    <ul class="navbar-nav">
+
+                        @if (Context.Session.GetInt32("UserID") != null)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    Welcome, @Context.Session.GetString("FullName")
+                                </span>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <!-- Submit a POST request when the user logs out. -->
+                                <form asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="nav-link border-0 bg-transparent">
+                                        Logout
+                                    </button>
+
+                                </form>
+
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Show Login and Register when the user is not logged in. -->
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+                                    Login
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Register">
+                                    Register
+                                </a>
+                            </li>
+                        }
+
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main page content appears here. -->
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <!-- Website footer. -->
+    <footer class="border-top text-muted py-3">
+        <div class="container text-center">
+            &copy; @DateTime.Now.Year - RaceDay
+            | Running, Walking and Cycling Events
+        </div>
+    </footer>
+
+    <!-- Load Bootstrap JavaScript. -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

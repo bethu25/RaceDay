@@ -1,0 +1,114 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<!-- Registration page container. -->
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card shadow">
+
+                <div class="card-body p-4">
+
+                    <h2 class="text-center fw-bold mb-3">
+                        Create Your RaceDay Account
+                    </h2>
+
+                    <p class="text-center text-muted mb-4">
+                        Join RaceDay and discover your next challenge.
+                    </p>
+
+                    <!-- Display registration errors. -->
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.ErrorMessage
+                        </div>
+                    }
+
+                    <form asp-controller="Account"
+                          asp-action="Register"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Full name. -->
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+
+                            <input type="text"
+                                   name="fullName"
+                                   class="form-control"
+                                   placeholder="Enter your full name"
+                                   required />
+                        </div>
+
+                        <!-- Email address. -->
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+
+                            <input type="email"
+                                   name="email"
+                                   class="form-control"
+                                   placeholder="Enter your email"
+                                   required />
+                        </div>
+
+                        <!-- Phone number. -->
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+
+                            <input type="tel"
+                                   name="phoneNumber"
+                                   class="form-control"
+                                   placeholder="Enter your phone number"
+                                   required />
+                        </div>
+
+                        <!-- Password. -->
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+
+                            <input type="password"
+                                   name="password"
+                                   class="form-control"
+                                   placeholder="Create a password"
+                                   minlength="8"
+                                   required />
+                        </div>
+
+                        <!-- Select the account role. -->
+                        <div class="mb-3">
+                            <label class="form-label">Account Type</label>
+
+                            <select name="role" class="form-select" required>
+                                <option value="">Select account type</option>
+                                <option value="Participant">Participant</option>
+                                <option value="Organiser">Organiser</option>
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Create Account
+                        </button>
+
+                    </form>
+
+                    <p class="text-center mt-3">
+                        Already have an account?
+
+                        <a asp-controller="Account"
+                           asp-action="Login">
+                            Log in here
+                        </a>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using RaceDay.API.Clean.Data;
-using Microsoft.AspNetCore.Identity;// Provides ASP.NET Core password hashing functionality.
-using RaceDay.API.Clean.Models;// Provides access to the RaceDay User model.
-using RaceDay.API.Clean.Services;// Provides access to the authentication service.
+using RaceDay.API.Clean.Models;
+using RaceDay.API.Clean.Services;
 
 namespace RaceDay.API.Clean
 {
@@ -10,77 +10,65 @@ namespace RaceDay.API.Clean
     {
         public static void Main(string[] args)
         {
-            // Sets the environment to Development so Swagger can be enabled.
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+            var builder = WebApplication.CreateBuilder(args);
 
+            // Register controllers for handling API requests.
+            builder.Services.AddControllers();
 
-        // Creates the application builder.
-        var builder = WebApplication.CreateBuilder(args);
+            // Register Swagger for testing API endpoints.
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
-            // Registers the RaceDay database connection with Entity Framework Core.
+            // Connect the API to the RaceDay SQL Server database.
             builder.Services.AddDbContext<RaceDayDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("RaceDayConnection")));
 
-            // Registers API controllers before the application is built.
-            builder.Services.AddControllers();
-            
-            // Registers the password hasher used to secure user passwords.
+            // Register password hashing for securely storing user passwords.
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
-            // Registers the authentication service for dependency injection.
+            // Register the authentication service.
             builder.Services.AddScoped<AuthService>();
 
-            // Registers the services required to store user session data.
+            // Enable in-memory storage for user sessions.
             builder.Services.AddDistributedMemoryCache();
 
-            // Enables session management for logged-in users.
+            // Configure session settings.
             builder.Services.AddSession(options =>
             {
-                // Ends the session after 30 minutes of inactivity.
+                // Automatically expire inactive sessions after 30 minutes.
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
 
-                // Prevents client-side scripts from accessing the session cookie.
+                // Prevent JavaScript from accessing the session cookie.
                 options.Cookie.HttpOnly = true;
 
-                // Allows the session cookie to work over local HTTP during development.
+                // Use HTTPS security when the request uses HTTPS.
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 
-                // Restricts the cookie to the same site.
+                // Allow the cookie to be sent with normal same-site requests.
                 options.Cookie.SameSite = SameSiteMode.Lax;
             });
 
-            // Registers the services required by Swagger.
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            // Builds the application after all services have been registered.
             var app = builder.Build();
 
-            // Displays the current environment and configured application URLs.
-            Console.WriteLine($"Environment: {app.Environment.EnvironmentName}");
-            Console.WriteLine($"Application URLs: {string.Join(", ", app.Urls)}");
-
-            // Enables Swagger in the Development environment.
+            // Enable Swagger when running in Development mode.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            // Enables session management before controllers handle requests.
+            // Enable session management before processing API requests.
             app.UseSession();
 
-            // Enables authorization middleware.
+            // Enable authorization for protected API endpoints.
             app.UseAuthorization();
 
-            // Maps controller endpoints, including all API controllers.
+            // Map API controllers to their routes.
             app.MapControllers();
 
-            // Starts the application.
+            // Start the API application.
             app.Run();
         }
     }
-
-
 }
