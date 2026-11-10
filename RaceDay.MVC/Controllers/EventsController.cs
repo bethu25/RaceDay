@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RaceDay.MVC.Services;
+using System.Text.Json;
 
 namespace RaceDay.MVC.Controllers
 {
@@ -15,7 +16,7 @@ namespace RaceDay.MVC.Controllers
             _eventApiService = eventApiService;
         }
 
-        // Displays events retrieved from the API.
+        // Displays all events retrieved from the API.
         public async Task<IActionResult> Index()
         {
             // Request events from the API.
@@ -24,14 +25,44 @@ namespace RaceDay.MVC.Controllers
             // Check whether the API request failed.
             if (events == null)
             {
-                // Display the actual error on the website.
                 ViewBag.ErrorMessage = _eventApiService.LastError;
-
                 return View();
             }
 
             // Send the events to the Razor view.
             return View(events);
+        }
+
+        // Displays the full details of one event.
+        // Example URL: /Events/Details/1
+        public async Task<IActionResult> Details(int id)
+        {
+            // Retrieve the selected event from the API.
+            JsonElement? eventDetails =
+                await _eventApiService.GetEventAsync(id);
+
+            // Check whether the event could be retrieved.
+            if (eventDetails == null)
+            {
+                ViewBag.ErrorMessage = _eventApiService.LastError;
+                return View();
+            }
+
+            // Retrieve categories belonging to this event.
+            var categories =
+                await _eventApiService.GetCategoriesForEventAsync(id);
+
+            // Store categories so that the Details view can display them.
+            ViewBag.Categories = categories ?? new List<JsonElement>();
+
+            // Display an error if the categories could not be retrieved.
+            if (categories == null)
+            {
+                ViewBag.CategoryError = _eventApiService.LastError;
+            }
+
+            // Send the event details to the Details view.
+            return View(eventDetails.Value);
         }
     }
 }

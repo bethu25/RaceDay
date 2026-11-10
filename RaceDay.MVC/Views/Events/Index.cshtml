@@ -87,12 +87,13 @@
 
                             </div>
 
-                            <!-- Event action -->
-                            <div class="card-footer bg-white">
-                                <button class="btn btn-primary w-100" disabled>
-                                    View Event
-                                </button>
-                            </div>
+                            <!-- Navigate to the selected event's details page. -->
+                            <a asp-controller="Events"
+                               asp-action="Details"
+                               asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
+                               class="btn btn-primary w-100">
+                                View Event
+                            </a>
 
                         </div>
 

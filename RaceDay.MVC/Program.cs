@@ -51,6 +51,7 @@ namespace RaceDay.MVC
             // Register the services used by MVC controllers.
             builder.Services.AddScoped<EventApiService>();
             builder.Services.AddScoped<AuthApiService>();
+            builder.Services.AddScoped<EnrolmentApiService>();
 
             var app = builder.Build();
 

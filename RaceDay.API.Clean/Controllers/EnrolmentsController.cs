@@ -56,14 +56,29 @@ namespace RaceDay.API.Clean.Controllers
                 return Forbid();
             }
 
-            // Return a simplified response to avoid exposing unrelated user information.
+            // Return enrolment information together with category and event details.
             var enrolments = await query.Select(e => new
             {
+                // Enrolment information.
                 e.EnrolmentID,
                 e.ParticipantID,
                 e.CategoryID,
                 e.EnrolmentDate,
-                e.Status
+                e.Status,
+
+                // Category information.
+                CategoryName = e.Category!.CategoryName,
+                CategoryDistance = e.Category.Distance,
+                EntryFee = e.Category.EntryFee,
+                MaxParticipants = e.Category.MaxParticipants,
+
+                // Event information.
+                EventID = e.Category.Event!.EventID,
+                EventName = e.Category.Event.EventName,
+                EventDate = e.Category.Event.EventDate,
+                Location = e.Category.Event.Location,
+                EventDistance = e.Category.Event.Distance,
+                EventType = e.Category.Event.EventType
             }).ToListAsync();
 
             return Ok(enrolments);

@@ -1,0 +1,155 @@
+﻿@model System.Text.Json.JsonElement
+
+@{
+    ViewData["Title"] = "My Enrolments";
+}
+
+<div class="container mt-5">
+
+    <!-- Display successful cancellation messages. -->
+    @if (TempData["CancellationSuccess"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["CancellationSuccess"]
+        </div>
+    }
+
+    <!-- Display cancellation errors. -->
+    @if (TempData["CancellationError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["CancellationError"]
+        </div>
+    }
+
+    <div class="mb-4">
+        <h1 class="fw-bold">My Enrolments</h1>
+        <p class="text-muted">
+            View the events and categories you have registered for.
+        </p>
+    </div>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+    else if (Model.ValueKind != System.Text.Json.JsonValueKind.Array
+             || Model.GetArrayLength() == 0)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h4>No Enrolments Yet</h4>
+
+                <p class="text-muted">
+                    You haven't enrolled in any events yet.
+                    Explore available events and find your next challenge!
+                </p>
+
+                <a asp-controller="Events"
+                   asp-action="Index"
+                   class="btn btn-primary">
+                    Explore Events
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+
+            @foreach (var enrolment in Model.EnumerateArray())
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <span class="badge bg-success mb-3">
+                                @enrolment.GetProperty("status").GetString()
+                            </span>
+
+                            <h4 class="fw-bold">
+                                @enrolment.GetProperty("eventName").GetString()
+                            </h4>
+
+                            <p class="text-muted">
+                                @enrolment.GetProperty("eventType").GetString()
+                                Event
+                            </p>
+
+                            <hr />
+
+                            <h5 class="fw-bold">Category Details</h5>
+
+                            <p>
+                                <strong>Category:</strong>
+                                @enrolment.GetProperty("categoryName").GetString()
+                            </p>
+
+                            <p>
+                                <strong>Category Distance:</strong>
+                                @enrolment.GetProperty("categoryDistance").GetDouble() km
+                            </p>
+
+                            <p>
+                                <strong>Entry Fee:</strong>
+                                R @enrolment.GetProperty("entryFee").GetDecimal().ToString("N2")
+                            </p>
+
+                            <hr />
+
+                            <p>
+                                <strong>Event Date:</strong>
+                                @(enrolment.GetProperty("eventDate")
+                                    .GetDateTime()
+                                    .ToString("dd MMMM yyyy"))
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong>
+                                @enrolment.GetProperty("location").GetString()
+                            </p>
+
+                            <p>
+                                <strong>Enrolment Date:</strong>
+                                @(enrolment.GetProperty("enrolmentDate")
+                                    .GetDateTime()
+                                    .ToString("dd MMMM yyyy"))
+                            </p>
+
+                            <!-- Allow participants to cancel their enrolment. -->
+                            <hr />
+
+                            <form asp-controller="Enrolments"
+                                  asp-action="Cancel"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <!-- Identify the enrolment that must be cancelled. -->
+                                <input type="hidden"
+                                       name="enrolmentId"
+                                       value="@enrolment.GetProperty("enrolmentID").GetInt32()" />
+
+                                <button type="submit"
+                                        class="btn btn-outline-danger w-100"
+                                        onclick="return confirm('Are you sure you want to cancel this enrolment?');">
+                                    Cancel Enrolment
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
