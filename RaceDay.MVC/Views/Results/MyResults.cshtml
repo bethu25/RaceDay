@@ -1,0 +1,97 @@
+﻿@using System.Text.Json
+
+@{
+    ViewData["Title"] = "My Results";
+
+    // Retrieve the results passed by the controller.
+    JsonElement results = Model;
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-2">My Results</h2>
+
+    <p class="text-muted">
+        View your finishing times and positions for completed events.
+    </p>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+    else if (results.ValueKind != JsonValueKind.Array || results.GetArrayLength() == 0)
+    {
+        <div class="alert alert-info">
+            You do not have any results available yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+
+            @foreach (JsonElement result in results.EnumerateArray())
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                @result.GetProperty("eventName").GetString()
+                            </h5>
+
+                            <p class="text-muted mb-2">
+                                @result.GetProperty("eventType").GetString()
+                            </p>
+
+                            <hr />
+
+                            <p>
+                                <strong>Category:</strong>
+                                @result.GetProperty("categoryName").GetString()
+                            </p>
+
+                            <p>
+                                <strong>Distance:</strong>
+                                @result.GetProperty("categoryDistance")
+                            </p>
+
+                            <p>
+                                <strong>Event Date:</strong>
+                                @result.GetProperty("eventDate").ToString()
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong>
+                                @result.GetProperty("location").GetString()
+                            </p>
+
+                            <hr />
+
+                            <p>
+                                <strong>Finishing Time:</strong>
+                                @result.GetProperty("finishTime").ToString()
+                            </p>
+
+                            <p>
+                                <strong>Position:</strong>
+
+                                <span class="badge bg-success">
+                                    @result.GetProperty("position")
+                                </span>
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Net.Http.Json;
 
 namespace RaceDay.MVC.Services
 {
@@ -34,33 +35,26 @@ namespace RaceDay.MVC.Services
         // Retrieves categories belonging to a specific event.
         public async Task<List<JsonElement>?> GetCategoriesForEventAsync(int eventId)
         {
-            // Retrieve all categories from the API.
             JsonElement? categories = await SendGetRequestAsync("api/Categories");
 
-            // Stop if the API request failed.
             if (categories == null)
             {
                 return null;
             }
 
-            // Store categories belonging to the requested event.
             List<JsonElement> eventCategories = new List<JsonElement>();
 
-            // Make sure the API returned an array.
             if (categories.Value.ValueKind != JsonValueKind.Array)
             {
                 LastError = "The categories response has an unexpected format.";
                 return null;
             }
 
-            // Check each category.
             foreach (JsonElement category in categories.Value.EnumerateArray())
             {
-                // Check whether the category belongs to this event.
                 if (category.TryGetProperty("eventID", out JsonElement categoryEventId)
                     && categoryEventId.GetInt32() == eventId)
                 {
-                    // Clone the category so it remains available after JSON processing.
                     eventCategories.Add(category.Clone());
                 }
             }
@@ -77,35 +71,28 @@ namespace RaceDay.MVC.Services
             {
                 var httpContext = _httpContextAccessor.HttpContext;
 
-                // Check whether the current MVC session is available.
                 if (httpContext == null)
                 {
                     LastError = "The current MVC session could not be accessed.";
                     return null;
                 }
 
-                // Retrieve the API session cookie saved during login.
                 string? apiCookie =
                     httpContext.Session.GetString("ApiSessionCookie");
 
                 using HttpRequestMessage request =
                     new HttpRequestMessage(HttpMethod.Get, endpoint);
 
-                // Forward the API session cookie for authentication.
                 if (!string.IsNullOrWhiteSpace(apiCookie))
                 {
-                    request.Headers.TryAddWithoutValidation(
-                        "Cookie", apiCookie);
+                    request.Headers.TryAddWithoutValidation("Cookie", apiCookie);
                 }
 
-                // Send the request to the API.
                 using HttpResponseMessage response =
                     await _httpClient.SendAsync(request);
 
-                string json =
-                    await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
 
-                // Handle unsuccessful API responses.
                 if (!response.IsSuccessStatusCode)
                 {
                     LastError =
@@ -115,17 +102,143 @@ namespace RaceDay.MVC.Services
                     return null;
                 }
 
-                // Convert the JSON response into a JsonElement.
                 using JsonDocument document = JsonDocument.Parse(json);
 
                 return document.RootElement.Clone();
             }
             catch (Exception ex)
             {
-                // Store the error instead of allowing the application to crash.
                 LastError = "Could not communicate with the API: " + ex.Message;
-
                 return null;
+            }
+        }
+
+        // Creates the event information sent to the API.
+        private object CreateEventData(
+            string eventName,
+            DateTime eventDate,
+            string location,
+            string? description,
+            decimal distance,
+            string eventType)
+        {
+            return new
+            {
+                EventName = eventName,
+                EventDate = eventDate,
+                Location = location,
+                Description = description,
+                Distance = distance,
+                EventType = eventType
+            };
+        }
+
+        // Sends a POST request to create an event.
+        public async Task<bool> CreateEventAsync(
+            string eventName,
+            DateTime eventDate,
+            string location,
+            string? description,
+            decimal distance,
+            string eventType)
+        {
+            return await SendEventRequestAsync(
+                HttpMethod.Post,
+                "api/Events",
+                CreateEventData(eventName, eventDate, location,
+                    description, distance, eventType));
+        }
+
+        // Sends a PUT request to update an existing event.
+        public async Task<bool> UpdateEventAsync(
+            int eventId,
+            string eventName,
+            DateTime eventDate,
+            string location,
+            string? description,
+            decimal distance,
+            string eventType)
+        {
+            return await SendEventRequestAsync(
+                HttpMethod.Put,
+                $"api/Events/{eventId}",
+                CreateEventData(eventName, eventDate, location,
+                    description, distance, eventType));
+        }
+
+        // Sends a DELETE request to remove an event.
+        public async Task<bool> DeleteEventAsync(int eventId)
+        {
+            return await SendEventRequestAsync(
+                HttpMethod.Delete,
+                $"api/Events/{eventId}");
+        }
+
+        // Sends authenticated POST, PUT or DELETE requests to the API.
+        private async Task<bool> SendEventRequestAsync(
+            HttpMethod method,
+            string endpoint,
+            object? eventData = null)
+        {
+            LastError = null;
+
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+
+                // Checks whether the current MVC session is available.
+                if (httpContext == null)
+                {
+                    LastError = "The current MVC session could not be accessed.";
+                    return false;
+                }
+
+                // Retrieves the API authentication cookie.
+                string? apiCookie =
+                    httpContext.Session.GetString("ApiSessionCookie");
+
+                // Creates the HTTP request.
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(method, endpoint);
+
+                // Adds event information for POST and PUT requests.
+                if (eventData != null)
+                {
+                    request.Content = JsonContent.Create(eventData);
+                }
+
+                // Forwards the API session cookie.
+                if (!string.IsNullOrWhiteSpace(apiCookie))
+                {
+                    request.Headers.TryAddWithoutValidation(
+                        "Cookie", apiCookie);
+                }
+
+                // Sends the request to the API.
+                using HttpResponseMessage response =
+                    await _httpClient.SendAsync(request);
+
+                // Handles unsuccessful API responses.
+                if (!response.IsSuccessStatusCode)
+                {
+                    string responseBody =
+                        await response.Content.ReadAsStringAsync();
+
+                    LastError =
+                        $"API Error: {(int)response.StatusCode} " +
+                        $"{response.ReasonPhrase}. Response: {responseBody}";
+
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LastError =
+                    "Could not communicate with the API: " + ex.Message;
+
+                return false;
             }
         }
     }

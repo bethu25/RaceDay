@@ -52,6 +52,7 @@ namespace RaceDay.MVC
             builder.Services.AddScoped<EventApiService>();
             builder.Services.AddScoped<AuthApiService>();
             builder.Services.AddScoped<EnrolmentApiService>();
+            builder.Services.AddScoped<ResultApiService>();
 
             var app = builder.Build();
 

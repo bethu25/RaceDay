@@ -58,13 +58,26 @@ namespace RaceDay.API.Clean.Controllers
                 return Forbid();
             }
 
-            // Return result details without unrelated user information.
+            // Return results together with their event and category details.
             var results = await query.Select(r => new
             {
+                // Result information.
                 r.ResultID,
                 r.EnrolmentID,
                 r.FinishTime,
-                r.Position
+                r.Position,
+
+                // Category information.
+                CategoryID = r.Enrolment!.Category!.CategoryID,
+                CategoryName = r.Enrolment.Category.CategoryName,
+                CategoryDistance = r.Enrolment.Category.Distance,
+
+                // Event information.
+                EventID = r.Enrolment.Category.Event!.EventID,
+                EventName = r.Enrolment.Category.Event.EventName,
+                EventDate = r.Enrolment.Category.Event.EventDate,
+                Location = r.Enrolment.Category.Event.Location,
+                EventType = r.Enrolment.Category.Event.EventType
             }).ToListAsync();
 
             return Ok(results);

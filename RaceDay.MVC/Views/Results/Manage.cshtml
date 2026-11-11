@@ -1,0 +1,176 @@
+﻿@using System.Text.Json
+@model JsonElement
+
+@{
+    ViewData["Title"] = "Manage Results";
+}
+
+<div class="container mt-4">
+
+    <!-- Page heading -->
+    <div class="mb-4">
+        <h2>Manage Event Results</h2>
+        <p class="text-muted">
+            View participants enrolled in your events and record their results.
+        </p>
+    </div>
+
+    <!-- Display success message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Display error message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <!-- Display enrolled participants -->
+    @if (Model.ValueKind == JsonValueKind.Array && Model.GetArrayLength() > 0)
+    {
+        <div class="row">
+
+            @foreach (var enrolment in Model.EnumerateArray())
+            {
+                <div class="col-md-6 mb-4">
+
+                    <div class="card shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <!-- Participant information -->
+                            <h5 class="card-title">
+                                @GetText(enrolment, "participantFullName", "Participant")
+                            </h5>
+
+                            <p class="text-muted">
+                                @GetText(enrolment, "participantEmail")
+                            </p>
+
+                            <hr />
+
+                            <!-- Event information -->
+                            <h6>Event Details</h6>
+
+                            <p>
+                                <strong>Event:</strong>
+                                @GetText(enrolment, "eventName")
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                @GetText(enrolment, "categoryName")
+                            </p>
+
+                            <p>
+                                <strong>Distance:</strong>
+                                @GetText(enrolment, "categoryDistance")
+                            </p>
+
+                            <p>
+                                <strong>Event Date:</strong>
+                                @GetText(enrolment, "eventDate")
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong>
+                                @GetText(enrolment, "location")
+                            </p>
+
+                            <p>
+                                <strong>Enrolment Status:</strong>
+                                <span class="badge bg-success">
+                                    @GetText(enrolment, "status")
+                                </span>
+                            </p>
+
+                            <hr />
+
+                            <!-- Form for recording participant results -->
+                            <h6>Record Participant Result</h6>
+
+                            <form asp-controller="Results"
+                                  asp-action="Record"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <!-- Identifies the participant's enrolment -->
+                                <input type="hidden"
+                                       name="enrolmentId"
+                                       value="@enrolment.GetProperty("enrolmentID").GetInt32()" />
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        Finishing Time
+                                    </label>
+
+                                    <input type="time"
+                                           name="finishTime"
+                                           class="form-control"
+                                           step="1"
+                                           required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        Finishing Position
+                                    </label>
+
+                                    <input type="number"
+                                           name="position"
+                                           class="form-control"
+                                           min="1"
+                                           required />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    Record Result
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty state when no participants have enrolled -->
+        <div class="alert alert-info">
+            There are currently no participant enrolments for your events.
+        </div>
+    }
+
+</div>
+
+@functions {
+    // Safely reads text values from the API response.
+    public string GetText(JsonElement item, string propertyName,
+                          string fallback = "Not available")
+    {
+        if (item.ValueKind == JsonValueKind.Object &&
+            item.TryGetProperty(propertyName, out JsonElement value))
+        {
+            return value.ToString();
+        }
+
+        return fallback;
+    }
+}

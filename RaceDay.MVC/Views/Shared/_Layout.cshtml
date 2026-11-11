@@ -24,14 +24,14 @@
                 background-color: #172554;
             }
 
-            .navbar .nav-link,
-            .navbar .navbar-brand {
-                color: white;
-            }
+                .navbar .nav-link,
+                .navbar .navbar-brand {
+                    color: white;
+                }
 
-            .navbar .nav-link:hover {
-                color: #93c5fd;
-            }
+                    .navbar .nav-link:hover {
+                        color: #93c5fd;
+                    }
 
             /* Keep the footer at the bottom of the page. */
             body {
@@ -44,17 +44,22 @@
                 flex: 1;
             }
     </style>
+
 </head>
 
 <body>
 
     <!-- Website navigation menu. -->
     <header>
+
         <nav class="navbar navbar-expand-lg">
+
             <div class="container">
 
                 <!-- Website logo/name. -->
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand"
+                   asp-controller="Home"
+                   asp-action="Index">
                     RaceDay
                 </a>
 
@@ -63,13 +68,16 @@
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#mainNavigation">
+
                     <span class="navbar-toggler-icon"></span>
+
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavigation">
 
                     <ul class="navbar-nav me-auto">
 
+                        <!-- Home link available to everyone. -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-controller="Home"
@@ -78,6 +86,7 @@
                             </a>
                         </li>
 
+                        <!-- Events link available to everyone. -->
                         <li class="nav-item">
                             <a class="nav-link"
                                asp-controller="Events"
@@ -86,7 +95,27 @@
                             </a>
                         </li>
 
-                        <!-- Show My Enrolments only to Participants. -->
+                        <!-- Organiser navigation. -->
+                        @if (Context.Session.GetString("UserRole") == "Organiser")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Events"
+                                   asp-action="Create">
+                                    Create Event
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Results"
+                                   asp-action="Manage">
+                                    Manage Results
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Participant navigation. -->
                         @if (Context.Session.GetString("UserRole") == "Participant")
                         {
                             <li class="nav-item">
@@ -96,14 +125,22 @@
                                     My Enrolments
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Results"
+                                   asp-action="MyResults">
+                                    My Results
+                                </a>
+                            </li>
                         }
 
                     </ul>
 
-                    <!-- Display different navigation links based on login status. -->
+                    <!-- Account information and authentication links. -->
                     <ul class="navbar-nav">
 
-                        @if (Context.Session.GetInt32("UserID") != null)
+                        @if (!string.IsNullOrWhiteSpace(Context.Session.GetString("UserID")))
                         {
                             <li class="nav-item">
                                 <span class="nav-link">
@@ -132,7 +169,7 @@
                         }
                         else
                         {
-                            <!-- Show Login and Register when the user is not logged in. -->
+                            <!-- Show Login and Register when logged out. -->
                             <li class="nav-item">
                                 <a class="nav-link"
                                    asp-controller="Account"
@@ -153,8 +190,11 @@
                     </ul>
 
                 </div>
+
             </div>
+
         </nav>
+
     </header>
 
     <!-- Main page content appears here. -->
@@ -164,10 +204,12 @@
 
     <!-- Website footer. -->
     <footer class="border-top text-muted py-3">
+
         <div class="container text-center">
             &copy; @DateTime.Now.Year - RaceDay
             | Running, Walking and Cycling Events
         </div>
+
     </footer>
 
     <!-- Load Bootstrap JavaScript. -->
@@ -176,4 +218,5 @@
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
+
 </html>

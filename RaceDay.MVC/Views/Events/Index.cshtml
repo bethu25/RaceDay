@@ -1,20 +1,53 @@
 ﻿@using System.Text.Json
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Upcoming Events";
+
+    // Retrieves the current user's role and ID from the MVC session.
+    string? userRole = Context.Session.GetString("UserRole");
+    // Retrieves the logged-in user's ID as an integer.
+    int? userID = Context.Session.GetInt32("UserID");
 }
 
 <div class="container mt-5">
 
-    <!-- Page heading -->
+    <!-- Display success and error messages. -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Page heading. -->
     <div class="text-center mb-5">
         <h1 class="fw-bold">Discover RaceDay Events</h1>
+
         <p class="text-muted">
             Find your next running, walking or cycling challenge.
         </p>
+
+        <!-- Only organisers can create events. -->
+        @if (userRole == "Organiser")
+        {
+            <a asp-controller="Events"
+               asp-action="Create"
+               class="btn btn-success mt-2">
+                + Create New Event
+            </a>
+        }
     </div>
 
-    <!-- Display an error if the API request failed -->
+    <!-- Display an error if the API request failed. -->
     @if (ViewBag.ErrorMessage != null)
     {
         <div class="alert alert-danger">
@@ -25,7 +58,7 @@
     else if (Model is JsonElement events &&
              events.ValueKind == JsonValueKind.Array)
     {
-        <!-- Check whether the API returned any events -->
+        <!-- Check whether the API returned any events. -->
         @if (events.GetArrayLength() == 0)
         {
             <div class="alert alert-info text-center">
@@ -34,7 +67,7 @@
         }
         else
         {
-            <!-- Display each event returned by the API -->
+            <!-- Display each event returned by the API. -->
             <div class="row">
 
                 @foreach (JsonElement raceEvent in events.EnumerateArray())
@@ -45,41 +78,47 @@
 
                             <div class="card-body">
 
-                                <!-- Event category -->
+                                <!-- Event category. -->
                                 <span class="badge bg-primary mb-3">
                                     @raceEvent.GetProperty("eventType").GetString()
                                 </span>
 
-                                <!-- Event name -->
+                                <!-- Event name. -->
                                 <h5 class="card-title fw-bold">
                                     @raceEvent.GetProperty("eventName").GetString()
                                 </h5>
 
-                                <!-- Event description -->
+                                <!-- Event description. -->
                                 <p class="text-muted">
-                                    @raceEvent.GetProperty("description").GetString()
+                                    @(
+                                        raceEvent.TryGetProperty("description", out JsonElement description)
+                                            ? description.GetString()
+                                            : "No description available."
+                                    )
                                 </p>
 
                                 <hr />
 
-                                <!-- Event date -->
+                                <!-- Event date. -->
                                 <p>
                                     <strong>Date:</strong>
+
                                     @{
                                         DateTime eventDate = raceEvent
                                             .GetProperty("eventDate")
                                             .GetDateTime();
                                     }
+
                                     @eventDate.ToString("dd MMMM yyyy")
                                 </p>
 
-                                <!-- Event location -->
+                                <!-- Event location. -->
                                 <p>
                                     <strong>Location:</strong>
                                     @raceEvent.GetProperty("location").GetString()
                                 </p>
 
-                                <!-- Event distance -->
+                                <!-- Event distance. -->
                                 <p>
                                     <strong>Distance:</strong>
                                     @raceEvent.GetProperty("distance").GetDouble() km
@@ -87,13 +126,61 @@
 
                             </div>
 
-                            <!-- Navigate to the selected event's details page. -->
-                            <a asp-controller="Events"
-                               asp-action="Details"
-                               asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
-                               class="btn btn-primary w-100">
-                                View Event
-                            </a>
+                            <!-- View event details button. -->
+                            <div class="card-footer bg-white border-0">
+
+                                <a asp-controller="Events"
+                                   asp-action="Details"
+                                   asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
+                                   class="btn btn-primary w-100 mb-2">
+                                    View Event
+                                </a>
+
+                                @{
+                                    // Checks whether the current organiser owns this event.
+                                    bool ownsEvent = false;
+
+                                    if (userRole == "Organiser" &&
+                                        userID.HasValue &&
+                                        raceEvent.TryGetProperty("organiserID", out JsonElement organiserID))
+                                    {
+                                        ownsEvent = organiserID.GetInt32() == userID.Value;
+                                    }
+                                }
+
+                                <!-- Only the event's organiser can edit or delete it. -->
+                                @if (ownsEvent)
+                                {
+                                    <div class="d-flex gap-2">
+
+                                        <a asp-controller="Events"
+                                           asp-action="Edit"
+                                           asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
+                                           class="btn btn-warning w-50">
+                                            Edit
+                                        </a>
+
+                                        <!-- Sends a POST request to delete the event. -->
+                                        <form asp-controller="Events"
+                                              asp-action="Delete"
+                                              asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
+                                              method="post"
+                                              class="w-50"
+                                              onsubmit="return confirm('Are you sure you want to delete this event?');">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-danger w-100">
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                }
+
+                            </div>
 
                         </div>
 
@@ -105,7 +192,7 @@
     }
     else
     {
-        <!-- Display a fallback message if the API response is unexpected -->
+        <!-- Displays a fallback message if the API response is unexpected. -->
         <div class="alert alert-warning">
             The events information could not be displayed.
         </div>

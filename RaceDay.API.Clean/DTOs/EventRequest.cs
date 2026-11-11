@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Json; // Allows the MVC application to send JSON requests.
 
 namespace RaceDay.API.Clean.DTOs
 {

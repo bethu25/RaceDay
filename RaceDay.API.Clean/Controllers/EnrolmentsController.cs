@@ -34,8 +34,9 @@ namespace RaceDay.API.Clean.Controllers
             int? userId = HttpContext.Session.GetInt32("UserID");
             string? role = HttpContext.Session.GetString("UserRole");
 
-            // Retrieve enrolments with their category and event information.
+            // Retrieve enrolments with participant, category and event information.
             var query = _context.Enrolments
+                .Include(e => e.Participant)
                 .Include(e => e.Category)
                 .ThenInclude(c => c!.Event)
                 .AsQueryable();
@@ -56,7 +57,7 @@ namespace RaceDay.API.Clean.Controllers
                 return Forbid();
             }
 
-            // Return enrolment information together with category and event details.
+            // Return enrolment, participant, category and event details.
             var enrolments = await query.Select(e => new
             {
                 // Enrolment information.
@@ -65,6 +66,10 @@ namespace RaceDay.API.Clean.Controllers
                 e.CategoryID,
                 e.EnrolmentDate,
                 e.Status,
+
+                // Participant information.
+                ParticipantFullName = e.Participant!.FullName,
+                ParticipantEmail = e.Participant.Email,
 
                 // Category information.
                 CategoryName = e.Category!.CategoryName,
