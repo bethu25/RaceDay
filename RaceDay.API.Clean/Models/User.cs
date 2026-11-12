@@ -43,5 +43,9 @@ namespace RaceDay.API.Clean.Models
         [Required]
         [StringLength(20)]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        // Stores the Azure Blob Storage name of the user's profile picture.
+        [StringLength(255)]
+        public string? ProfileImage { get; set; }
     }
 }

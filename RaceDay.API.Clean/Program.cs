@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using RaceDay.API.Clean.Data;
 using RaceDay.API.Clean.Models;
 using RaceDay.API.Clean.Services;
+using Azure.Storage.Blobs;
+using RaceDay.API.Clean.Services;
 
 namespace RaceDay.API.Clean
 {
@@ -11,6 +13,24 @@ namespace RaceDay.API.Clean
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Read the Azure Storage connection string from User Secrets.
+            string? azureConnectionString =
+                builder.Configuration["AzureStorage:ConnectionString"];
+
+            // Stop the application if the Azure connection string is missing.
+            if (string.IsNullOrWhiteSpace(azureConnectionString))
+            {
+                throw new InvalidOperationException(
+                    "Azure Storage connection string is missing.");
+            }
+
+            // Register the Azure Blob Storage client.
+            builder.Services.AddSingleton(
+                new BlobServiceClient(azureConnectionString));
+
+            // Register the service that handles file uploads.
+            builder.Services.AddScoped<BlobStorageService>();
 
             // Register controllers for handling API requests.
             builder.Services.AddControllers();

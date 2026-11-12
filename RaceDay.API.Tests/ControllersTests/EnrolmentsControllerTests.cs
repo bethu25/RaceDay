@@ -15,10 +15,10 @@ namespace RaceDay.API.Tests.ControllersTests
         private RaceDayDbContext CreateDatabase()
         {
             var options = new DbContextOptionsBuilder<RaceDayDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
-        return new RaceDayDbContext(options);
+            return new RaceDayDbContext(options);
         }
 
         // Creates the controller with a simulated logged-in user.
@@ -49,12 +49,48 @@ namespace RaceDay.API.Tests.ControllersTests
             return controller;
         }
 
-        // Adds an event owned by Organiser 1 and a category for that event.
+        // Adds the required users, an event and a category.
         private async Task AddSampleEventAndCategory(
             RaceDayDbContext context,
             int maxParticipants = 10)
         {
-            // Add a sample event.
+            // Add the Organiser who owns the sample event.
+            context.Users.Add(new User
+            {
+                UserID = 1,
+                FullName = "Test Organiser",
+                Email = "organiser@test.com",
+                Password = "testpassword",
+                Role = "Organiser",
+                PhoneNumber = "0711111111"
+            });
+
+            // Add the first Participant.
+            context.Users.Add(new User
+            {
+                UserID = 10,
+                FullName = "Test Participant One",
+                Email = "participant1@test.com",
+                Password = "testpassword",
+                Role = "Participant",
+                PhoneNumber = "0722222222"
+            });
+
+            // Add the second Participant.
+            context.Users.Add(new User
+            {
+                UserID = 20,
+                FullName = "Test Participant Two",
+                Email = "participant2@test.com",
+                Password = "testpassword",
+                Role = "Participant",
+                PhoneNumber = "0733333333"
+            });
+
+            // Save the users before adding related records.
+            await context.SaveChangesAsync();
+
+            // Add a sample event owned by Organiser 1.
             context.Events.Add(new Event
             {
                 EventID = 1,
@@ -78,6 +114,7 @@ namespace RaceDay.API.Tests.ControllersTests
                 MaxParticipants = maxParticipants
             });
 
+            // Save the event and category.
             await context.SaveChangesAsync();
         }
 
@@ -417,6 +454,4 @@ namespace RaceDay.API.Tests.ControllersTests
             }
         }
     }
-
-
 }

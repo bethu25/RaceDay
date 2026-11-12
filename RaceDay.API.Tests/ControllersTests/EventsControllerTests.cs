@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using RaceDay.API.Clean.Controllers;
 using RaceDay.API.Clean.Data;
 using RaceDay.API.Clean.DTOs;
 using RaceDay.API.Clean.Models;
+using RaceDay.API.Clean.Services;
 using Xunit;
 
 namespace RaceDay.API.Tests.ControllersTests
@@ -20,6 +22,15 @@ namespace RaceDay.API.Tests.ControllersTests
                 .Options;
 
             return new RaceDayDbContext(options);
+        }
+
+        // Creates a local Azure client for testing without using real Azure credentials.
+        private BlobStorageService CreateBlobStorageService()
+        {
+            var blobClient = new BlobServiceClient(
+                "UseDevelopmentStorage=true");
+
+            return new BlobStorageService(blobClient);
         }
 
         // TEST 1: Check that an existing event can be retrieved.
@@ -45,8 +56,10 @@ namespace RaceDay.API.Tests.ControllersTests
             context.Events.Add(sampleEvent);
             await context.SaveChangesAsync();
 
-            // Arrange: Create the controller.
-            var controller = new EventsController(context);
+            // Arrange: Create the controller with its required services.
+            var controller = new EventsController(
+                context,
+                CreateBlobStorageService());
 
             // Provide an HTTP context for the controller.
             controller.ControllerContext = new ControllerContext
@@ -74,8 +87,10 @@ namespace RaceDay.API.Tests.ControllersTests
             // Arrange: Create an empty temporary database.
             using var context = CreateDatabase();
 
-            // Arrange: Create the controller.
-            var controller = new EventsController(context);
+            // Arrange: Create the controller with its required services.
+            var controller = new EventsController(
+                context,
+                CreateBlobStorageService());
 
             // Provide an HTTP context for the controller.
             controller.ControllerContext = new ControllerContext
@@ -111,8 +126,10 @@ namespace RaceDay.API.Tests.ControllersTests
             context.Users.Add(organiser);
             await context.SaveChangesAsync();
 
-            // Arrange: Create the controller.
-            var controller = new EventsController(context);
+            // Arrange: Create the controller with its required services.
+            var controller = new EventsController(
+                context,
+                CreateBlobStorageService());
 
             // Create an HTTP context for the simulated session.
             var httpContext = new DefaultHttpContext();
@@ -210,4 +227,3 @@ namespace RaceDay.API.Tests.ControllersTests
         }
     }
 }
-

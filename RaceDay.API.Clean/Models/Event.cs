@@ -44,6 +44,10 @@ namespace RaceDay.API.Clean.Models
         [StringLength(10)]
         public string EventType { get; set; } = string.Empty;
 
+        // Stores the Azure Blob Storage name of the event banner.
+        [StringLength(255)]
+        public string? BannerImage { get; set; }
+
         // Navigation property for the user who organised the event.
         public User? Organiser { get; set; }
     }
