@@ -6,7 +6,6 @@
 
     // Retrieves the current user's role and ID from the MVC session.
     string? userRole = Context.Session.GetString("UserRole");
-    // Retrieves the logged-in user's ID as an integer.
     int? userID = Context.Session.GetInt32("UserID");
 }
 
@@ -90,11 +89,9 @@
 
                                 <!-- Event description. -->
                                 <p class="text-muted">
-                                    @(
-                                        raceEvent.TryGetProperty("description", out JsonElement description)
-                                            ? description.GetString()
-                                            : "No description available."
-                                    )
+                                    @(raceEvent.TryGetProperty("description", out JsonElement description)
+                                        ? description.GetString()
+                                        : "No description available.")
                                 </p>
 
                                 <hr />
@@ -126,9 +123,10 @@
 
                             </div>
 
-                            <!-- View event details button. -->
+                            <!-- Event action buttons. -->
                             <div class="card-footer bg-white border-0">
 
+                                <!-- All users can view event details. -->
                                 <a asp-controller="Events"
                                    asp-action="Details"
                                    asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
@@ -148,11 +146,12 @@
                                     }
                                 }
 
-                                <!-- Only the event's organiser can edit or delete it. -->
+                                <!-- Only the event's organiser can manage it. -->
                                 @if (ownsEvent)
                                 {
-                                    <div class="d-flex gap-2">
+                                    <div class="d-flex gap-2 mb-2">
 
+                                        <!-- Edit event button. -->
                                         <a asp-controller="Events"
                                            asp-action="Edit"
                                            asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
@@ -160,7 +159,7 @@
                                             Edit
                                         </a>
 
-                                        <!-- Sends a POST request to delete the event. -->
+                                        <!-- Delete event using a POST request. -->
                                         <form asp-controller="Events"
                                               asp-action="Delete"
                                               asp-route-id="@raceEvent.GetProperty("eventID").GetInt32()"
@@ -178,6 +177,14 @@
                                         </form>
 
                                     </div>
+
+                                    <!-- Organiser can manage categories for this event. -->
+                                    <a asp-controller="Categories"
+                                       asp-action="Index"
+                                       asp-route-eventId="@raceEvent.GetProperty("eventID").GetInt32()"
+                                       class="btn btn-info w-100">
+                                        Manage Categories
+                                    </a>
                                 }
 
                             </div>

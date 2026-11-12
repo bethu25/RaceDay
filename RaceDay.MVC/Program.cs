@@ -54,6 +54,9 @@ namespace RaceDay.MVC
             builder.Services.AddScoped<EnrolmentApiService>();
             builder.Services.AddScoped<ResultApiService>();
 
+            // Handles communication with the Categories API.
+            builder.Services.AddScoped<CategoryApiService>();
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())
