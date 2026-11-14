@@ -95,6 +95,18 @@
                             </a>
                         </li>
 
+                        <!-- Profile link available to logged-in users. -->
+                        @if (Context.Session.GetInt32("UserID").HasValue)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Profile"
+                                   asp-action="Index">
+                                    My Profile
+                                </a>
+                            </li>
+                        }
+
                         <!-- Organiser navigation. -->
                         @if (Context.Session.GetString("UserRole") == "Organiser")
                         {
@@ -140,7 +152,7 @@
                     <!-- Account information and authentication links. -->
                     <ul class="navbar-nav">
 
-                        @if (!string.IsNullOrWhiteSpace(Context.Session.GetString("UserID")))
+                        @if (Context.Session.GetInt32("UserID").HasValue)
                         {
                             <li class="nav-item">
                                 <span class="nav-link">

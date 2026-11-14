@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+      - master
+      - part3-raceday
+
   pull_request:
     branches:
       - main
+      - master
+      - part3-raceday
+
   workflow_dispatch:
 
 jobs:
@@ -28,11 +34,14 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      # Build the solution.
-      - name: Build project
+      # Build the complete solution.
+      - name: Build solution
         run: dotnet build --no-restore --configuration Release
+
+      # Explicitly build the MVC application.
+      - name: Build MVC application
+        run: dotnet build RaceDay.MVC/RaceDay.MVC.csproj --configuration Release
 
       # Run the automated unit tests.
       - name: Run unit tests
         run: dotnet test --no-build --configuration Release --verbosity normal
-

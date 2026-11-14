@@ -1,0 +1,109 @@
+﻿@model RaceDay.MVC.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Edit My Profile</h3>
+                </div>
+
+                <div class="card-body">
+
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.ErrorMessage
+                        </div>
+                    }
+
+                    <p class="text-muted">
+                        Update your RaceDay account information below.
+                    </p>
+
+                    <form asp-controller="Profile"
+                          asp-action="Edit"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Keep the user's ID when submitting the form. -->
+                        <input type="hidden" asp-for="UserID" />
+
+                        <!-- Full name field. -->
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">
+                                Full Name
+                            </label>
+
+                            <input asp-for="FullName"
+                                   class="form-control"
+                                   required />
+
+                            <span asp-validation-for="FullName"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <!-- Email field. -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">
+                                Email Address
+                            </label>
+
+                            <input asp-for="Email"
+                                   type="email"
+                                   class="form-control"
+                                   required />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <!-- Phone number field. -->
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">
+                                Phone Number
+                            </label>
+
+                            <input asp-for="PhoneNumber"
+                                   type="tel"
+                                   class="form-control" />
+                        </div>
+
+                        <!-- Display the user's role without allowing changes. -->
+                        <div class="mb-3">
+                            <label class="form-label">Account Role</label>
+
+                            <input class="form-control"
+                                   value="@Model.Role"
+                                   readonly />
+                        </div>
+
+                        <!-- Save and cancel buttons. -->
+                        <button type="submit" class="btn btn-primary">
+                            Save Changes
+                        </button>
+
+                        <a asp-controller="Profile"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
