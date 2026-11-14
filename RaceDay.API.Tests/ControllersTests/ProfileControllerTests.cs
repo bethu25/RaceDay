@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Azure.Storage.Blobs;
 using RaceDay.API.Clean.Controllers;
 using RaceDay.API.Clean.Data;
 using RaceDay.API.Clean.DTOs;
 using RaceDay.API.Clean.Models;
+using RaceDay.API.Clean.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,11 +26,24 @@ namespace RaceDay.API.Tests
             return new RaceDayDbContext(options);
         }
 
+        // Creates the Azure storage service for controller testing.
+        private static BlobStorageService CreateBlobStorageService()
+        {
+            // Creates a client without making an actual Azure connection.
+            var blobClient = new BlobServiceClient(
+                "UseDevelopmentStorage=true");
+
+            return new BlobStorageService(blobClient);
+        }
+
         // Creates the controller and gives it a logged-in user's session.
         private static ProfileController CreateController(
             RaceDayDbContext context, int userId)
         {
-            var controller = new ProfileController(context);
+            // Supply both dependencies required by the controller.
+            var controller = new ProfileController(
+                context,
+                CreateBlobStorageService());
 
             var httpContext = new DefaultHttpContext();
             httpContext.Session = new TestSession();

@@ -158,7 +158,7 @@ namespace RaceDay.API.Clean.Controllers
         [RequestSizeLimit(5 * 1024 * 1024)]
         public async Task<IActionResult> UploadBanner(
             int id,
-            [FromForm] IFormFile? file)
+            IFormFile? file)
         {
             // Retrieve the logged-in Organiser ID.
             int? organiserId = HttpContext.Session.GetInt32("UserID");

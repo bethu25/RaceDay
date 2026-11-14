@@ -1,0 +1,149 @@
+﻿@model RaceDay.MVC.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Organiser Dashboard";
+}
+
+<div class="container mt-4">
+
+    <!-- Dashboard heading -->
+    <div class="mb-4">
+        <h2 class="fw-bold">Organiser Dashboard</h2>
+        <p class="text-muted">
+            Welcome to your RaceDay event management dashboard.
+            Here you can monitor your events and participant enrolments.
+        </p>
+    </div>
+
+    <!-- Display API errors when information cannot be retrieved -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <!-- Dashboard summary cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Events</h6>
+                    <h2 class="fw-bold">@Model.TotalEvents</h2>
+                    <p class="mb-0">Events created by you</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Enrolments</h6>
+                    <h2 class="fw-bold">@Model.TotalEnrolments</h2>
+                    <p class="mb-0">Participants enrolled in your events</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Upcoming Events</h6>
+                    <h2 class="fw-bold">@Model.UpcomingEvents</h2>
+                    <p class="mb-0">Events scheduled for the future</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Event overview table -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">My Event Overview</h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Events.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Enrolments</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var eventItem in Model.Events)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        @eventItem.EventName
+                                    </td>
+
+                                    <td>
+                                        @eventItem.EventDate.ToString("dd MMM yyyy")
+                                    </td>
+
+                                    <td>
+                                        @eventItem.Location
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            @eventItem.TotalEnrolments
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a asp-controller="Events"
+                                           asp-action="Details"
+                                           asp-route-id="@eventItem.EventID"
+                                           class="btn btn-sm btn-outline-primary">
+                                            View Event
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    You have not created any events yet.
+                </div>
+            }
+
+        </div>
+    </div>
+
+    <!-- Quick action buttons -->
+    <div class="mt-4 mb-4">
+        <a asp-controller="Events"
+           asp-action="Create"
+           class="btn btn-primary me-2">
+            Create New Event
+        </a>
+
+        <a asp-controller="Events"
+           asp-action="Index"
+           class="btn btn-outline-dark">
+            View All Events
+        </a>
+    </div>
+
+</div>

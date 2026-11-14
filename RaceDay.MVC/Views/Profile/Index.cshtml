@@ -1,0 +1,127 @@
+﻿@model RaceDay.MVC.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">My RaceDay Profile</h3>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.ErrorMessage
+                        </div>
+                    }
+
+                    <!-- Displays the user's profile picture. -->
+                    <div class="text-center mb-4">
+
+                        @if (!string.IsNullOrEmpty(Model.ProfileImage))
+                        {
+                            <img src="@Url.Action("Picture", "Profile")"
+                                 alt="Profile Picture"
+                                 class="rounded-circle border"
+                                 style="width: 150px; height: 150px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 150px; height: 150px; font-size: 50px;">
+                                <span>👤</span>
+                            </div>
+                        }
+
+                    </div>
+
+                    <!-- Allows the user to upload a profile picture. -->
+                    <h5 class="mb-3">Update Profile Picture</h5>
+
+                    <form asp-controller="Profile"
+                          asp-action="UploadPicture"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <input type="file"
+                                   name="file"
+                                   class="form-control"
+                                   accept=".jpg,.jpeg,.png,.webp"
+                                   required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mb-4">
+                            Upload Picture
+                        </button>
+
+                    </form>
+
+                    <hr />
+
+                    <!-- Displays the user's account information. -->
+                    <h5 class="mb-3">Account Information</h5>
+
+                    <p><strong>User ID:</strong> @Model.UserID</p>
+
+                    <p><strong>Full Name:</strong> @Model.FullName</p>
+
+                    <p><strong>Email:</strong> @Model.Email</p>
+
+                    <p><strong>Role:</strong> @Model.Role</p>
+
+                    <p>
+                        <strong>Phone Number:</strong>
+                        @(string.IsNullOrEmpty(Model.PhoneNumber)
+                            ? "Not provided"
+                            : Model.PhoneNumber)
+                    </p>
+
+                    <div class="mt-3">
+
+                        <a asp-controller="Profile"
+                           asp-action="Edit"
+                           class="btn btn-primary">
+                            Edit Profile
+                        </a>
+
+                        <a asp-controller="Events"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Back to Events
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

@@ -9,6 +9,15 @@
     // Retrieve the categories passed through ViewBag.
     List<JsonElement> categories = ViewBag.Categories
         as List<JsonElement> ?? new List<JsonElement>();
+
+    // Retrieve the event ID.
+    int eventId = eventDetails.GetProperty("eventID").GetInt32();
+
+    // Check whether the event has a banner image.
+    bool hasBanner =
+        eventDetails.TryGetProperty("bannerImage", out JsonElement banner)
+        && banner.ValueKind == JsonValueKind.String
+        && !string.IsNullOrWhiteSpace(banner.GetString());
 }
 
 <div class="container mt-5">
@@ -29,6 +38,17 @@
             @eventDetails.GetProperty("eventType").GetString()
         </span>
     </div>
+
+    <!-- Event banner image -->
+    @if (hasBanner)
+    {
+        <div class="mb-4">
+            <img src="@Url.Action("Banner", "Events", new { id = eventId })"
+                 alt="Event banner"
+                 class="img-fluid rounded shadow-sm w-100"
+                 style="max-height: 400px; object-fit: cover;" />
+        </div>
+    }
 
     <!-- Event information -->
     <div class="card shadow-sm mb-5">
@@ -71,21 +91,23 @@
 
         </div>
     </div>
-    <!-- Display successful enrolment messages. -->
-@if (TempData["EnrolmentSuccess"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["EnrolmentSuccess"]
-    </div>
-}
 
-<!-- Display enrolment errors. -->
-@if (TempData["EnrolmentError"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["EnrolmentError"]
-    </div>
-}
+    <!-- Display successful enrolment messages. -->
+    @if (TempData["EnrolmentSuccess"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["EnrolmentSuccess"]
+        </div>
+    }
+
+    <!-- Display enrolment errors. -->
+    @if (TempData["EnrolmentError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["EnrolmentError"]
+        </div>
+    }
+
     <!-- Available categories -->
     <div class="mb-4">
 
@@ -145,15 +167,13 @@
 
                                     @Html.AntiForgeryToken()
 
-                                    <!-- Send the selected category ID to the controller. -->
                                     <input type="hidden"
                                            name="categoryId"
                                            value="@category.GetProperty("categoryID").GetInt32()" />
 
-                                    <!-- Send the current event ID to the controller. -->
                                     <input type="hidden"
                                            name="eventId"
-                                           value="@eventDetails.GetProperty("eventID").GetInt32()" />
+                                           value="@eventId" />
 
                                     <button type="submit" class="btn btn-primary w-100">
                                         Enrol Now
