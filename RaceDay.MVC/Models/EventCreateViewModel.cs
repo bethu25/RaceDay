@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace RaceDay.MVC.Models
 {
-    // Stores the information entered when an organiser creates an event.
+    // Stores the information entered when an organiser creates or edits an event.
     public class EventCreateViewModel
     {
         // Stores the event name.
@@ -32,5 +33,8 @@ namespace RaceDay.MVC.Models
         [RegularExpression("^(Run|Walk|Cycle)$",
             ErrorMessage = "Event type must be Run, Walk or Cycle.")]
         public string EventType { get; set; } = string.Empty;
+
+        // Stores the optional event banner selected by the organiser.
+        public IFormFile? BannerFile { get; set; }
     }
 }

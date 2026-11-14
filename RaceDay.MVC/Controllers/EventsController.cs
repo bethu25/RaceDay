@@ -103,7 +103,8 @@ namespace RaceDay.MVC.Controllers
                 return View(model);
             }
 
-            bool created = await _eventApiService.CreateEventAsync(
+            // Creates the event and receives its new ID.
+            int? eventId = await _eventApiService.CreateEventAsync(
                 model.EventName,
                 model.EventDate,
                 model.Location,
@@ -112,7 +113,8 @@ namespace RaceDay.MVC.Controllers
                 model.EventType
             );
 
-            if (!created)
+            // Checks whether the event was created successfully.
+            if (eventId == null)
             {
                 ModelState.AddModelError(
                     string.Empty,
@@ -121,6 +123,25 @@ namespace RaceDay.MVC.Controllers
                 return View(model);
             }
 
+            // Uploads the banner if the organiser selected one.
+            if (model.BannerFile != null && model.BannerFile.Length > 0)
+            {
+                bool uploaded = await _eventApiService.UploadBannerAsync(
+                    eventId.Value,
+                    model.BannerFile
+                );
+
+                if (!uploaded)
+                {
+                    TempData["ErrorMessage"] =
+                        "Event created, but banner upload failed: " +
+                        _eventApiService.LastError;
+
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // Displays a success message.
             TempData["SuccessMessage"] = "Event created successfully!";
 
             return RedirectToAction("Index");
@@ -214,6 +235,25 @@ namespace RaceDay.MVC.Controllers
             return RedirectToAction("Index");
         }
 
+        // Retrieves an event banner image through the API.
+        [HttpGet]
+        public async Task<IActionResult> Banner(int id)
+        {
+            // Retrieves the image from Azure through the API.
+            var banner = await _eventApiService.GetBannerAsync(id);
+
+            if (banner.ImageData == null)
+            {
+                return NotFound();
+            }
+
+            // Returns the image to the browser.
+            return File(
+                banner.ImageData,
+                banner.ContentType ?? "image/jpeg"
+            );
+        }
+
         // Deletes an event after receiving a POST request.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -245,4 +285,3 @@ namespace RaceDay.MVC.Controllers
         }
     }
 }
- 

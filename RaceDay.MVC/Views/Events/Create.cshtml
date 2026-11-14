@@ -19,7 +19,8 @@
 
             <form asp-controller="Events"
                   asp-action="Create"
-                  method="post">
+                  method="post"
+                  enctype="multipart/form-data">
 
                 @Html.AntiForgeryToken()
 
@@ -104,7 +105,7 @@
                 </div>
 
                 <!-- Event type -->
-                <div class="mb-4">
+                <div class="mb-3">
                     <label asp-for="EventType" class="form-label fw-semibold">
                         Event Type
                     </label>
@@ -117,6 +118,27 @@
                     </select>
 
                     <span asp-validation-for="EventType"
+                          class="text-danger"></span>
+                </div>
+
+                <!-- Event banner image upload -->
+                <div class="mb-4">
+                    <label asp-for="BannerFile"
+                           class="form-label fw-semibold">
+                        Event Banner Image (Optional)
+                    </label>
+
+                    <input asp-for="BannerFile"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp"
+                           class="form-control" />
+
+                    <small class="text-muted">
+                        Accepted formats: JPG, JPEG, PNG and WEBP.
+                        Maximum file size: 5 MB.
+                    </small>
+
+                    <span asp-validation-for="BannerFile"
                           class="text-danger"></span>
                 </div>
 

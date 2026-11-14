@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 
 namespace RaceDay.MVC.Services
 {
@@ -133,8 +134,8 @@ namespace RaceDay.MVC.Services
             };
         }
 
-        // Sends a POST request to create an event.
-        public async Task<bool> CreateEventAsync(
+        // Creates an event and returns its new event ID.
+        public async Task<int?> CreateEventAsync(
             string eventName,
             DateTime eventDate,
             string location,
@@ -142,11 +143,197 @@ namespace RaceDay.MVC.Services
             decimal distance,
             string eventType)
         {
-            return await SendEventRequestAsync(
-                HttpMethod.Post,
-                "api/Events",
-                CreateEventData(eventName, eventDate, location,
-                    description, distance, eventType));
+            LastError = null;
+
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+
+                if (httpContext == null)
+                {
+                    LastError = "The current MVC session could not be accessed.";
+                    return null;
+                }
+
+                string? apiCookie =
+                    httpContext.Session.GetString("ApiSessionCookie");
+
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(HttpMethod.Post, "api/Events");
+
+                request.Content = JsonContent.Create(
+                    CreateEventData(eventName, eventDate, location,
+                        description, distance, eventType));
+
+                if (!string.IsNullOrWhiteSpace(apiCookie))
+                {
+                    request.Headers.TryAddWithoutValidation("Cookie", apiCookie);
+                }
+
+                using HttpResponseMessage response =
+                    await _httpClient.SendAsync(request);
+
+                string json = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    LastError =
+                        $"API Error: {(int)response.StatusCode} " +
+                        $"{response.ReasonPhrase}. Response: {json}";
+
+                    return null;
+                }
+
+                using JsonDocument document = JsonDocument.Parse(json);
+
+                JsonElement eventData = document.RootElement;
+
+                // Reads the ID returned by the API.
+                if (eventData.TryGetProperty("eventID", out JsonElement eventId))
+                {
+                    return eventId.GetInt32();
+                }
+
+                if (eventData.TryGetProperty("EventID", out eventId))
+                {
+                    return eventId.GetInt32();
+                }
+
+                LastError = "The API created the event but did not return its ID.";
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LastError =
+                    "Could not create the event: " + ex.Message;
+
+                return null;
+            }
+        }
+
+        // Uploads an event banner image to the API.
+        public async Task<bool> UploadBannerAsync(int eventId, IFormFile file)
+        {
+            LastError = null;
+
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+
+                if (httpContext == null)
+                {
+                    LastError = "The current MVC session could not be accessed.";
+                    return false;
+                }
+
+                string? apiCookie =
+                    httpContext.Session.GetString("ApiSessionCookie");
+
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(
+                        HttpMethod.Post,
+                        $"api/Events/{eventId}/banner");
+
+                // Creates a multipart form for the image upload.
+                using MultipartFormDataContent multipartContent =
+                    new MultipartFormDataContent();
+
+                using Stream fileStream = file.OpenReadStream();
+
+                using StreamContent streamContent =
+                    new StreamContent(fileStream);
+
+                streamContent.Headers.ContentType =
+                    new MediaTypeHeaderValue(file.ContentType);
+
+                // The field name must match the API parameter: file.
+                multipartContent.Add(streamContent, "file", file.FileName);
+
+                request.Content = multipartContent;
+
+                // Forwards the API authentication cookie.
+                if (!string.IsNullOrWhiteSpace(apiCookie))
+                {
+                    request.Headers.TryAddWithoutValidation(
+                        "Cookie", apiCookie);
+                }
+
+                using HttpResponseMessage response =
+                    await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string responseBody =
+                        await response.Content.ReadAsStringAsync();
+
+                    LastError =
+                        $"Banner upload failed: {(int)response.StatusCode} " +
+                        $"{response.ReasonPhrase}. Response: {responseBody}";
+
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LastError = "Could not upload the event banner: " + ex.Message;
+                return false;
+            }
+        }
+
+        // Retrieves an event banner image through the API.
+        public async Task<(byte[]? ImageData, string? ContentType)> GetBannerAsync(int eventId)
+        {
+            LastError = null;
+
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+
+                if (httpContext == null)
+                {
+                    LastError = "The current MVC session could not be accessed.";
+                    return (null, null);
+                }
+
+                string? apiCookie =
+                    httpContext.Session.GetString("ApiSessionCookie");
+
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(
+                        HttpMethod.Get,
+                        $"api/Events/{eventId}/banner");
+
+                // Forwards the API authentication cookie.
+                if (!string.IsNullOrWhiteSpace(apiCookie))
+                {
+                    request.Headers.TryAddWithoutValidation("Cookie", apiCookie);
+                }
+
+                using HttpResponseMessage response =
+                    await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    LastError = "Could not retrieve the event banner.";
+
+                    return (null, null);
+                }
+
+                byte[] imageData =
+                    await response.Content.ReadAsByteArrayAsync();
+
+                string? contentType =
+                    response.Content.Headers.ContentType?.MediaType;
+
+                return (imageData, contentType);
+            }
+            catch (Exception ex)
+            {
+                LastError = "Could not retrieve the event banner: " + ex.Message;
+                return (null, null);
+            }
         }
 
         // Sends a PUT request to update an existing event.
